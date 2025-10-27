@@ -58,9 +58,9 @@ unique_jobs['skills'] = unique_jobs['matched_description'].apply(extract_skills)
 unique_jobs['skills_str'] = unique_jobs['skills'].apply(lambda x: ', '.join(x) if x else '')
 
 # Integrate with ESCO official skills
-esco_occupations = pd.read_csv('occupations_en.csv')
-esco_skills = pd.read_csv('skills_en.csv')
-esco_relations = pd.read_csv('occupationSkillRelations_en.csv')
+esco_occupations = pd.read_csv('data/occupations_en.csv')
+esco_skills = pd.read_csv('data/skills_en.csv')
+esco_relations = pd.read_csv('data/occupationSkillRelations_en.csv')
 
 # Create mapping of code -> list of skill labels
 skill_map = {}
@@ -85,14 +85,14 @@ unique_jobs['esco_skills'] = unique_jobs['matched_code'].apply(lambda x: skill_m
 unique_jobs['esco_skills_str'] = unique_jobs['esco_skills'].apply(lambda x: ', '.join(x))
 
 # Save processed unique jobs with both NLP and ESCO skills
-output_file = 'processed_unique_jobs_with_skills.csv'
+output_file = 'data/processed_unique_jobs_with_skills.csv'
 unique_jobs[['matched_code', 'matched_label', 'matched_description', 'skills_str', 'esco_skills_str']].to_csv(output_file, index=False)
 print(f"Saved processed data to '{output_file}'")
 
 # Provide counts of occurrences per code
 grouped_counts = df.groupby('matched_code').size().reset_index(name='count')
-grouped_counts.to_csv('grouped_counts_by_code.csv', index=False)
-print("Saved grouped counts to 'grouped_counts_by_code.csv'")
+grouped_counts.to_csv('data/grouped_counts_by_code.csv', index=False)
+print("Saved grouped counts to 'data/grouped_counts_by_code.csv'")
 
 # Parse dates from Q# YYYY to month
 def parse_quarter_date(qstr):
@@ -133,7 +133,7 @@ def build_trajectory(group):
     return pd.DataFrame(sequences)
 
 trajectories = df_sorted.groupby('person_id').apply(build_trajectory).reset_index(drop=True)
-trajectories.to_csv('jobhop_trajectories.csv', index=False)
+trajectories.to_csv('data/jobhop_trajectories.csv', index=False)
 print(f"Generated {len(trajectories)} trajectories; avg length: {df_sorted.groupby('person_id').size().mean()}")
 
 # Differentiate skill types for nuanced analysis

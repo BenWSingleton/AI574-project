@@ -4,7 +4,7 @@ import spacy
 
 # Better to load dataset from csv because HuggingFace has a few bad columns
 # Download ResumeTrain.csv from https://huggingface.co/datasets/Divyaamith/resume-dataset/resolve/main/ResumeTrain.csv
-df = pd.read_csv('ResumeTrain.csv', on_bad_lines='skip', usecols=range(4), names=['ID', 'Resume_str', 'Resume_html', 'Category'], header=None, low_memory=False)
+df = pd.read_csv('data/ResumeTrain.csv', on_bad_lines='skip', usecols=range(4), names=['ID', 'Resume_str', 'Resume_html', 'Category'], header=None, low_memory=False)
 
 print(f"Dataset shape: {df.shape}")
 print(df.head())
@@ -31,7 +31,7 @@ def extract_skills_spacy(text):
 df['extracted_skills_spacy'] = df['cleaned_resume_str'].apply(extract_skills_spacy)
 
 # Match to ESCO skills
-esco_df = pd.read_csv('esco_skills.csv')
+esco_df = pd.read_csv('data/skills_en.csv')
 esco_skills = set(esco_df['preferredLabel'].str.lower().unique())
 
 def match_esco_skills(extracted_skills):
@@ -41,6 +41,6 @@ def match_esco_skills(extracted_skills):
 df['esco_matched_skills'] = df['extracted_skills_spacy'].apply(match_esco_skills)
 
 # Save preprocessed dataset
-df.to_csv('preprocessed_resumes.csv', index=False)
+df.to_csv('data/preprocessed_resumes.csv', index=False)
 
-print("Preprocessing complete. Saved to 'preprocessed_resumes.csv'")
+print("Preprocessing complete. Saved to 'data/preprocessed_resumes.csv'")
