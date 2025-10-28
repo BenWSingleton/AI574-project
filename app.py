@@ -31,4 +31,6 @@ fig = px.scatter_3d(
     symbol="label",
     title="Embeddings in 3D"
 )
+fig.update_layout(height=800, width=1200) # Adjust the height and width as needed
+fig.update_traces(marker=dict(size=10)) # Adjust the size of the markers
 st.plotly_chart(fig, use_container_width=True)
