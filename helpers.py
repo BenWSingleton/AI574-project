@@ -81,14 +81,14 @@ def get_list(data, col, doc_type, max_workers=5, model="mistral:instruct"):
                 data.at[index, 'extracted_skills'] = []
     return data
 
-def fill_missing_skills(data, doc_type):
+def fill_missing_skills(data, skills_col, doc_type):
     data = data.copy()
 
-    for index, row in tqdm.tqdm(data.iterrows(), total=len(data)):
+    for index, row in data.iterrows():
         if len(row['extracted_skills']) == 0:
             try:
                 print(f"Filling skills for row {index}")
-                prompt = get_prompt(row['Resume_str'], doc_type)
+                prompt = get_prompt(row[skills_col], doc_type)
                 response = get_response(prompt)
                 skills = ast.literal_eval(response['response'].strip())
                 data.at[index, 'extracted_skills'] = skills
