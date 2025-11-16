@@ -2,6 +2,16 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
+def get_metrics(list1, list2):
+    set1 = set(list1)
+    set2 = set(list2)
+
+    overlap = set1 & set2
+    difference = set1 ^ set2
+
+    print(f"Overlap: {len(overlap)}")
+    print(f"No Overlap: {len(difference)} ")
+
 def intersection_score(skills1, skills2):
     if len(skills1) != len(skills2):
         return "Can't match "

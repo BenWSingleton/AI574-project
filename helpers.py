@@ -46,6 +46,15 @@ def get_embedding(text):
     response = ollama.embeddings(model="nomic-embed-text", prompt=text)
     return response['embedding']
 
+def get_batch_embeddings(input):
+    response = ollama.embed(model="nomic-embed-text", input=input)
+    return response
+
+def embed_skills_list(matched_skills):
+    joined_matched_skills = [','.join(skills) for skills in matched_skills] 
+    response = get_batch_embeddings(joined_matched_skills)
+    return response
+
 def match_closed_skills(skills, esco_embeddings, top_k=5):
     skill_embeddings = [get_embedding(skill)['embedding'] for skill in skills]
     similarities = cosine_similarity(skill_embeddings, esco_embeddings)
