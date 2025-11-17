@@ -6,7 +6,7 @@ from pathlib import Path
 st.set_page_config(page_title="Individual ESCO Skill Matching Dashboard", layout="wide")
 
 MATCH_DIR = Path("matches")
-SUMMARY_FILE = MATCH_DIR / "summary_scores.parquet"
+SUMMARY_FILE = MATCH_DIR / "ind_skills_scores.parquet"
 
 st.title("Resume ↔ Job Matching Dashboard")
 st.sidebar.header("Controls")
