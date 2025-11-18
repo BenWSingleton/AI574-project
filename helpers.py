@@ -168,3 +168,16 @@ def match_all_skills_con(data, esco_skills, threshold=0.8, max_workers=4):
             data.at[index, 'matched_skills'] = matched
 
     return data
+
+def predict_missing(row, job_embeddings, jobs):
+    # 1. Compute embedding difference
+    diff = np.array(row['best_match_job_embedding']) - np.array(row['skill_embeddings_ordered'])
+    
+    # 2. Cosine similarity against job embeddings (assumed to be an array)
+    diffs = cosine_similarity([diff], job_embeddings)
+    
+    # 3. Pick best job index
+    best_idx = diffs.argmax()
+    
+    # 4. Return that job's matched skills as a set
+    return set(jobs['matched_skills_ordered'].iloc[best_idx])

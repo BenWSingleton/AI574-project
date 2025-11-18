@@ -2,6 +2,36 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
+
+def found_score(true_missing, predicted_missing):
+    scores = []
+    for t, p in zip(true_missing, predicted_missing):
+        t = set(t)
+        p = set(p)
+        score = len(t.intersection(p))/len(t) if len(t) > 0 else 0
+        scores = scores + [score]
+    return np.mean(scores)
+
+def unnecessary_score(true_missing, predicted_missing):
+    scores = []
+    for t, p in zip(true_missing, predicted_missing):
+        t = set(t)
+        p = set(p)
+        score = len(p - t)/len(p) if len(p) > 0 else 0
+        scores = scores + [score]
+    return np.mean(scores)
+
+def redundant_score(predicted_missing, skills_present):
+    scores = []
+    for p, r in zip(predicted_missing, skills_present):
+        p = set(p)
+        r = set(r)
+        
+        score = len(p & r)/len(p) if len(p) > 0 else 0   
+        scores = scores + [score]
+
+    return np.mean(scores)
+
 def get_metrics(list1, list2):
     set1 = set(list1)
     set2 = set(list2)
@@ -11,20 +41,3 @@ def get_metrics(list1, list2):
 
     print(f"Overlap: {len(overlap)}")
     print(f"No Overlap: {len(difference)} ")
-
-def intersection_score(skills1, skills2):
-    if len(skills1) != len(skills2):
-        return "Can't match "
-    
-    total_score = 0
-    count = 0
-
-    for group1, group2 in zip(skills1, skills2):
-        set1, set2 = set(group1), set(group2)
-        overlap = len(set1 & set2)
-        union = len(set1 | set2)
-        score = overlap / union if union else 0
-        total_score += score
-        count += 1
-
-    return (total_score / count) if count > 0 else 0.0
