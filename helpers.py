@@ -46,6 +46,15 @@ def get_embedding(text):
     response = ollama.embeddings(model="nomic-embed-text", prompt=text)
     return response['embedding']
 
+def get_batch_embeddings(input):
+    response = ollama.embed(model="nomic-embed-text", input=input)
+    return response
+
+def embed_skills_list(matched_skills):
+    joined_matched_skills = [','.join(skills) for skills in matched_skills] 
+    response = get_batch_embeddings(joined_matched_skills)
+    return response
+
 def match_closed_skills(skills, esco_embeddings, top_k=5):
     skill_embeddings = [get_embedding(skill)['embedding'] for skill in skills]
     similarities = cosine_similarity(skill_embeddings, esco_embeddings)
@@ -158,4 +167,41 @@ def match_all_skills_con(data, esco_skills, threshold=0.8, max_workers=4):
             index, matched = future.result()
             data.at[index, 'matched_skills'] = matched
 
+    return data
+
+def predict_missing(row, job_embeddings, jobs):
+    diff = np.array(row['best_match_job_embedding']) - np.array(row['skill_embeddings_ordered'])
+
+    diffs = cosine_similarity([diff], job_embeddings)
+
+    best_idx = diffs.argmax()
+
+    return {
+        "difference": diff,
+        "skills": jobs['matched_skills_ordered'].iloc[best_idx],
+        "embeddings": jobs['skill_embeddings_ordered'].iloc[best_idx],
+        "id": best_idx
+    }
+
+def average_skills(data, esco):
+    embedding_lookup = {
+        row["preferredLabel"]: np.array(row["embeddings"])
+        for _, row in esco.iterrows()
+    }
+
+    averages = []
+
+    for _, row in tqdm.tqdm(data.iterrows(), total=len(data)):
+        skill_embeddings = [
+            embedding_lookup[skill]
+            for skill in row["matched_skills"]
+            if skill in embedding_lookup
+        ]
+
+        if len(skill_embeddings) == 0:
+            averages.append(None)
+        else:
+            averages.append(np.mean(np.vstack(skill_embeddings), axis=0))
+
+    data["avg_skill_embedding"] = averages
     return data
