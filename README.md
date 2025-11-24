@@ -1,11 +1,7 @@
 # AI574-project
 
 To Do 
-- Improve embeddings with more preprocessing and putting my alphabetical order
-- seperate embedding comparison
-- try comparing any two embeddings
-- manually get set difference of job and resume, score based on number of skills found
-- take single skill embeddings, average each one for a resume, do comparisons
+- add difference to visualization
 
 Metrics
 y_true: the skills missing in the job that are in the resume

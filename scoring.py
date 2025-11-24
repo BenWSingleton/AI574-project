@@ -41,3 +41,16 @@ def get_metrics(list1, list2):
 
     print(f"Overlap: {len(overlap)}")
     print(f"No Overlap: {len(difference)} ")
+
+def presence_score(true_missing, predicted_missing):
+    hits = 0
+    total = len(true_missing)
+
+    for t, p in zip(true_missing, predicted_missing):
+        t = set(t)
+        p = set(p)
+
+        if len(t & p) > 0:
+            hits += 1
+
+    return hits / total if total > 0 else 0

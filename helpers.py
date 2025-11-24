@@ -170,14 +170,38 @@ def match_all_skills_con(data, esco_skills, threshold=0.8, max_workers=4):
     return data
 
 def predict_missing(row, job_embeddings, jobs):
-    # 1. Compute embedding difference
     diff = np.array(row['best_match_job_embedding']) - np.array(row['skill_embeddings_ordered'])
-    
-    # 2. Cosine similarity against job embeddings (assumed to be an array)
+
     diffs = cosine_similarity([diff], job_embeddings)
-    
-    # 3. Pick best job index
+
     best_idx = diffs.argmax()
-    
-    # 4. Return that job's matched skills as a set
-    return set(jobs['matched_skills_ordered'].iloc[best_idx])
+
+    return {
+        "difference": diff,
+        "skills": jobs['matched_skills_ordered'].iloc[best_idx],
+        "embeddings": jobs['skill_embeddings_ordered'].iloc[best_idx],
+        "id": best_idx
+    }
+
+def average_skills(data, esco):
+    embedding_lookup = {
+        row["preferredLabel"]: np.array(row["embeddings"])
+        for _, row in esco.iterrows()
+    }
+
+    averages = []
+
+    for _, row in tqdm.tqdm(data.iterrows(), total=len(data)):
+        skill_embeddings = [
+            embedding_lookup[skill]
+            for skill in row["matched_skills"]
+            if skill in embedding_lookup
+        ]
+
+        if len(skill_embeddings) == 0:
+            averages.append(None)
+        else:
+            averages.append(np.mean(np.vstack(skill_embeddings), axis=0))
+
+    data["avg_skill_embedding"] = averages
+    return data
