@@ -169,8 +169,8 @@ def match_all_skills_con(data, esco_skills, threshold=0.8, max_workers=4):
 
     return data
 
-def predict_missing(row, job_embeddings, jobs):
-    diff = np.array(row['best_match_job_embedding']) - np.array(row['skill_embeddings_ordered'])
+def predict_missing(row, job_embeddings, jobs, skills_col, embedding_col):
+    diff = np.array(row['best_match_job_embedding']) - np.array(row[embedding_col])
 
     diffs = cosine_similarity([diff], job_embeddings)
 
@@ -178,8 +178,8 @@ def predict_missing(row, job_embeddings, jobs):
 
     return {
         "difference": diff,
-        "skills": jobs['matched_skills_ordered'].iloc[best_idx],
-        "embeddings": jobs['skill_embeddings_ordered'].iloc[best_idx],
+        "skills": jobs[skills_col].iloc[best_idx],
+        "embeddings": jobs[embedding_col].iloc[best_idx],
         "id": best_idx
     }
 

@@ -15,3 +15,6 @@ redudant: skills predicted that are already present / number of skills predicted
 
 Finding
 - semantic relationships extend to multiple concepts
+
+
+maybe a far away point indicates very different missing skills. a data scientist applying at a hospital missing medical experience 
