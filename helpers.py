@@ -172,7 +172,11 @@ def match_all_skills_con(data, esco_skills, threshold=0.8, max_workers=4):
 def predict_missing(row, job_embeddings, jobs, skills_col, embedding_col):
     diff = np.array(row['best_match_job_embedding']) - np.array(row[embedding_col])
 
-    diffs = cosine_similarity([diff], job_embeddings)
+    diffs = cosine_similarity([diff], job_embeddings)[0]  # shape: (num_jobs,)
+
+    # ---- EXCLUDE ORIGINAL JOB ----
+    #original_idx = row['best_match_index']  # or whatever column stores it
+    #diffs[original_idx] = -np.inf
 
     best_idx = diffs.argmax()
 
