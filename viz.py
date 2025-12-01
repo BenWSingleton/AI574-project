@@ -9,7 +9,7 @@ st.set_page_config(page_title="Resume-Job Visualization", layout="wide")
 
 df = pd.read_parquet('processed/dim_reduced.parquet')
 
-df = df.sample(n=5, random_state=44).reset_index(drop=True)
+df = df.sample(n=10, random_state=44).reset_index(drop=True)
 
 columns = ['matched_skills_ordered', 'best_match_job_skills']
 
