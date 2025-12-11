@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
-
 
 def found_score(true_missing, predicted_missing):
     scores = []
@@ -12,13 +10,27 @@ def found_score(true_missing, predicted_missing):
         scores = scores + [score]
     return np.mean(scores)
 
+def presence_score(true_missing, predicted_missing):
+    hits = 0
+    total = len(true_missing)
+
+    for t, p in zip(true_missing, predicted_missing):
+        t = set(t)
+        p = set(p)
+
+        if len(t.intersection(p)) > 0:
+            hits += 1
+
+    return hits / total if total > 0 else 0
+
 def unnecessary_score(true_missing, predicted_missing):
     scores = []
     for t, p in zip(true_missing, predicted_missing):
         t = set(t)
         p = set(p)
-        score = len(p - t)/len(p) if len(p) > 0 else 0
+        score = len(p.difference(t))/len(p) if len(p) > 0 else 0
         scores = scores + [score]
+
     return np.mean(scores)
 
 def redundant_score(predicted_missing, skills_present):
@@ -27,7 +39,7 @@ def redundant_score(predicted_missing, skills_present):
         p = set(p)
         r = set(r)
         
-        score = len(p & r)/len(p) if len(p) > 0 else 0   
+        score = len(p.intersection(r))/len(p) if len(p) > 0 else 0   
         scores = scores + [score]
 
     return np.mean(scores)
@@ -41,16 +53,3 @@ def get_metrics(list1, list2):
 
     print(f"Overlap: {len(overlap)}")
     print(f"No Overlap: {len(difference)} ")
-
-def presence_score(true_missing, predicted_missing):
-    hits = 0
-    total = len(true_missing)
-
-    for t, p in zip(true_missing, predicted_missing):
-        t = set(t)
-        p = set(p)
-
-        if len(t & p) > 0:
-            hits += 1
-
-    return hits / total if total > 0 else 0
