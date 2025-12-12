@@ -75,11 +75,10 @@ def process_row(row, col, doc_type, model="mistral:instruct"):
 def get_list(data, col, doc_type, max_workers=5, model="mistral:instruct"):
     data = data.copy()
     data['extracted_skills'] = None
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor: 
-        # Submit all tasks
         future_to_index = {executor.submit(process_row, row, col, doc_type, model): row.name for index, row in data.iterrows()}
         
-        # Process completed tasks with progress bar
         for future in tqdm.tqdm(as_completed(future_to_index), total=len(data)):
             try:
                 index, skills = future.result(timeout=120)
@@ -107,20 +106,14 @@ def fill_missing_skills(data, skills_col, doc_type):
     return data
 
 def match_closest_skills(skills, esco_skills, threshold=0.8, fill=False):
-    """
-    Given a list of skill names and a dataframe of ESCO skills (with columns
-    'preferredLabel' and 'embeddings'), return a list of the closest ESCO skill for each.
-    """
     matched_skills = []
     scores = []
 
-    # Extract ESCO data
     esco_embeddings = np.vstack(esco_skills['embeddings'].to_numpy())
     esco_labels = esco_skills['preferredLabel'].tolist()
 
-    # Assume you have a function get_embedding(skill) that returns the same kind of embedding
     for skill in skills:
-        emb = get_embedding(skill)  # You’ll need to define this part
+        emb = get_embedding(skill)
         sim = cosine_similarity([emb], esco_embeddings)[0]
         best_match_score = np.max(sim)
         best_match_idx = np.argmax(sim)
@@ -136,7 +129,6 @@ def match_closest_skills(skills, esco_skills, threshold=0.8, fill=False):
     return matched_skills, scores
 
 def process_row_skills(args):
-    """Helper for multiprocessing — matches skills for one row."""
     index, row, esco_skills, threshold = args
     matched, _ = match_closest_skills(row['extracted_skills'], esco_skills, threshold=threshold)
     return index, matched
@@ -169,17 +161,20 @@ def match_all_skills_con(data, esco_skills, threshold=0.8, max_workers=4):
 
     return data
 
-def predict_missing(row, job_embeddings, jobs):
-    diff = np.array(row['best_match_job_embedding']) - np.array(row['skill_embeddings_ordered'])
+def predict_missing(row, job_embeddings, jobs, skills_col, embedding_col):
+    diff = np.array(row['best_match_job_embedding']) - np.array(row[embedding_col])
 
-    diffs = cosine_similarity([diff], job_embeddings)
+    diffs = cosine_similarity([diff], job_embeddings)[0]  # shape: (num_jobs,)
+
+    #original_idx = row['best_match_index']  # or whatever column stores it
+    #diffs[original_idx] = -np.inf
 
     best_idx = diffs.argmax()
 
     return {
         "difference": diff,
-        "skills": jobs['matched_skills_ordered'].iloc[best_idx],
-        "embeddings": jobs['skill_embeddings_ordered'].iloc[best_idx],
+        "skills": jobs[skills_col].iloc[best_idx],
+        "embeddings": jobs[embedding_col].iloc[best_idx],
         "id": best_idx
     }
 
